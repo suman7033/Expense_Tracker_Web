@@ -1,0 +1,32 @@
+/* expenseDetails.css */
+.container {
+    display: flex;
+  }
+  
+  .auth {
+    flex: 1;
+    padding: 20px;
+  }
+  
+  .table {
+    flex: 1;
+    padding: 20px;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .table table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #6dea47;
+    
+  }
+  
+  .table th, .table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
