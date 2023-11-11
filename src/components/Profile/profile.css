@@ -1,0 +1,37 @@
+.maindiv{
+    padding: 0px;
+    margin: -90px;
+    justify-content: space-between;
+    text-align: center;
+    /* border-style: double;
+    border-color: black; */
+    width: fit-content;
+    width: 520px;
+    padding: 50px;
+    margin-left: 30%;
+    
+}
+.cancelDiv{
+   display: flex;
+   justify-content: flex-end;
+  /* justify-content: space-around; */
+  border: none;
+}
+.cancelBtn{
+   background-color: #f1f1f6;
+   border-color: red;
+   border-radius: 8px;
+   color: red;
+}
+.updateBtn{
+   border-color: blue;
+   border-radius: 5px;
+   color: white;
+   background-color: green;
+   margin: 20px;
+   padding: 10px;
+}
+.input{
+   border-radius: 5px;
+   border-color: rgb(10, 10, 10);
+}

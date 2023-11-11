@@ -1,0 +1,41 @@
+.container {
+    display: flex;
+    justify-content: space-between;
+    background-color: #640def;
+  }
+  
+.right {
+    flex: 1px; /* To allow each line to take equal space and push apart */
+    padding: 10px;
+    background-color: #f1abab;
+    border-radius: 15px;
+    font-size: 18px;
+  }
+.left{
+    flex: 1px;
+    padding: 10px;
+    font-size: 20px;
+}
+  
+.button{
+    color: rgb(10, 111, 243);
+    border: none;
+    border-radius: 20px;
+}
+.verifyBtn{
+   border-radius: 5px;
+   margin: 35px;
+   background-color: rgb(225, 225, 27);
+}
+.verifyBtn:hover{
+    background-color: #fff;
+    cursor: pointer;
+}
+.logoutBtn{
+  cursor: pointer;
+  border-radius: 10px;
+  margin: 40px;
+}
+.logoutBtn:hover{
+  background-color: #f28e8e;
+}

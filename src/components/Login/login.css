@@ -1,0 +1,79 @@
+.auth{
+    margin: 3rem auto;
+    width: 95%;
+    max-width: 25rem;
+    border-radius: 16px;
+    background-color: #328396;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    padding: 1rem;
+    text-align: center;
+}
+.auth h1 {
+    text-align: center;
+    color: rgba(67, 250, 11, 0.905);
+  }
+  
+  .control {
+    margin-bottom: 0.5rem;
+  }
+  
+  .control label {
+    display: block;
+    color: rgb(211, 220, 204);
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+  
+  .control input {
+    font: inherit;
+    background-color: #f7f3ee;
+    color: #070707;
+    border-radius: 4px;
+    border: 1px solid white;
+    width: 100%;
+    text-align: left;
+    padding: 0.25rem;
+  }
+  
+  .actions {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .actions button {
+    cursor: pointer;
+    font: inherit;
+    color: white;
+    background-color: #485804;
+    border: 1px solid #aecc5c;
+    border-radius: 4px;
+    padding: 0.5rem 2.5rem;
+  }
+  
+  .actions button:hover {
+    background-color: #0c7803;
+    border-color: #873abb;
+  }
+  
+  .actions .toggle {
+    margin-top: 1rem;
+    background-color: transparent;
+    color: #0a0c0b;
+    border: none;
+    padding: 0.15rem 1.5rem;
+  }
+  
+  .actions .toggle:hover {
+    background-color: transparent;
+    color: #f9f7f9;
+  }
+.Fbtn{
+  border: none;
+  border-radius: 5px;
+  color: red;
+}
+.forgot{
+  background-color: rgb(248, 244, 244);
+}
