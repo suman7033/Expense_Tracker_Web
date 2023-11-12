@@ -1,68 +1,71 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import './expenseDetails.css';
 
 const ExpenseDetails = () => {
-  const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('');
-  const [price, setPrice] = useState('');
-  const [expenses, setExpenses] = useState([]);
+  const [expenses, setExpenses]=useState([]);
+  const [addExpenses, setAddExpense]=useState(false);
+  const [editedExpense, setEditedExpense]=useState(null);
 
-  const addExpenseHandler = (event) => {
-     //event.preventDefault();
-    // Check if all fields are filled
-    if (title.trim() === '' || category.trim() === '' || price.trim() === '') {
-      alert('Please fill in all fields.');
-     }else{
-       alert("ok your data is store in fireDatabase")
-       //fetch fairDatabase;
-     }
-      
-    // Create a new expense object
-    const newExpense = {
-      title,
-      category,
-      price,
-    };
+  const titleInputRef=useRef("");
+  const amountInputRef=useRef("");
+  const categoryInputRef=useRef("");
+    
+    const addExpenseHandler=async(event)=>{
+       event.preventDefault();
+       const expense={
+         title: titleInputRef.current.value,
+         category: categoryInputRef.current.value,
+         amount: amountInputRef.current.value,
+       }
+       try{
+         const postExpense = await fetch (
+           "https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails.json",
+           {
+             method: 'POST',
+             body: JSON.stringify(expense),
+             headers: {
+               'Content-Type': 'application/json',
+             },
+           }
+         );
+         if(postExpense.ok){
+           const data=await postExpense.json();
+           const updatedExpense={...expense}
+           setExpenses((prevExpense)=> [...prevExpense,updatedExpense])
+            //setExpenses(data)
+            alert("database",data)
+         }
+       } catch (error){
+         console.log(error);
+       }
+       titleInputRef.current.value="";
+       categoryInputRef.current.value="";
+       amountInputRef.current.value="";
 
-    // Update the expenses list
-    setExpenses((prevExpenses) => [...prevExpenses, newExpense]);
-
-    // Clear the input fields
-    setTitle('');
-    setCategory('');
-    setPrice('');
-
-    //fecth
-     
-  //fetch
-  };
+    }
+    
 
     const deleteExpenseHandler = (index) => {
-        const updatedExpenses = [...expenses];
-        updatedExpenses.splice(index, 1);
-        setExpenses(updatedExpenses);
+         
+
       };
-      const [editedExpense, setEditedExpense] = useState(null);
 
       const editExpenseHandler = (index) => {
-        // Set the selected expense for editing
-        setEditedExpense(expenses[index]);
+         
+
       };
       const cancelHandler=(index)=>{
-        setEditedExpense(expenses[index]);
+         
+
       }
     
       const handleEditSubmit = (updatedExpense) => {
-        // Update the expenses array with the edited expense
-        const updatedExpenses = expenses.map((expense) =>
-          expense.id === updatedExpense.id ? updatedExpense : expense
-        );
-        setExpenses(updatedExpenses);
-    
-        // Clear the edited expense state to exit the edit mode
-        setEditedExpense(null);
+         
+
+
+
       };
-       
+       //alert(expenses);
       
 
   return (
@@ -72,15 +75,15 @@ const ExpenseDetails = () => {
         <hr />
         <div className='form-group'>
           <label htmlFor='title'>Expense Title</label><br/>
-          <input type='text' id='title' className='input' value={title} placeholder='Expense Title' onChange={(event) => setTitle(event.target.value)} />
+          <input type='text' id='title' className='input' placeholder='Expense Title' ref={titleInputRef}/>
         </div>
         <div className='form-group'>
           <label htmlFor='category'>Category</label><br/>
-          <input type='text' className='input'id='category' value={category} placeholder='Enter Category' onChange={(event) => setCategory(event.target.value)} />
+          <input type='text' className='input'id='category' placeholder='Enter Category' ref={categoryInputRef} />
         </div>
         <div className='form-group'>
           <label htmlFor='price'>Price</label><br/>
-          <input type='text' id='price' className='input' value={price} placeholder='Enter Price' onChange={(event) => setPrice(event.target.value)} />
+          <input type='text' id='price' className='input' placeholder='Enter Price' ref={amountInputRef} />
         </div>
         <button onClick={addExpenseHandler} className='resetBtn'>
           Add Expense
@@ -100,7 +103,7 @@ const ExpenseDetails = () => {
               <tr key={index}>
                 <td>{expense.title}</td>
                 <td>{expense.category}</td>
-                <td>{expense.price}</td>
+                <td>{expense.amount}</td>
                 <td>
                     <button onClick={()=>editExpenseHandler(index)}>Edit</button>
                     <button onClick={()=>deleteExpenseHandler(index)}>Delete</button>
@@ -108,6 +111,7 @@ const ExpenseDetails = () => {
               </tr>
             ))}
           </tbody>
+           
         </table>
         {/* Edit form */}
       {editedExpense && (
