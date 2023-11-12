@@ -1,4 +1,3 @@
-// ExpenseDetails.jsx
 import React, { useState } from 'react';
 import './expenseDetails.css';
 
@@ -8,13 +7,16 @@ const ExpenseDetails = () => {
   const [price, setPrice] = useState('');
   const [expenses, setExpenses] = useState([]);
 
-  const addExpenseHandler = () => {
+  const addExpenseHandler = (event) => {
+     //event.preventDefault();
     // Check if all fields are filled
     if (title.trim() === '' || category.trim() === '' || price.trim() === '') {
       alert('Please fill in all fields.');
-      return;
-    }
-
+     }else{
+       alert("ok your data is store in fireDatabase")
+       //fetch fairDatabase;
+     }
+      
     // Create a new expense object
     const newExpense = {
       title,
@@ -29,6 +31,10 @@ const ExpenseDetails = () => {
     setTitle('');
     setCategory('');
     setPrice('');
+
+    //fecth
+     
+  //fetch
   };
 
     const deleteExpenseHandler = (index) => {
@@ -56,7 +62,6 @@ const ExpenseDetails = () => {
         // Clear the edited expense state to exit the edit mode
         setEditedExpense(null);
       };
-    
        
       
 
@@ -127,8 +132,8 @@ const ExpenseDetails = () => {
 
             <label htmlFor="price">Price:</label>
             <input type="text" id="price" defaultValue={editedExpense.price} required />
-
-            <button type="submit">Save</button>
+            &nbsp;
+            <button type="submit">Save</button> &nbsp;
             <button onClick={cancelHandler}>cancel</button>
           </form>
         </div>

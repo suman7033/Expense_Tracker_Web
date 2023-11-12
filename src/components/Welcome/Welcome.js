@@ -1,5 +1,5 @@
 import {Link} from 'react-router-dom';
-import React, { useState } from 'react';
+import React, { useEffect, useState,useCallback } from 'react';
 import './welcome.css';
 
 const Welcome = () => {
@@ -10,6 +10,28 @@ const Welcome = () => {
       localStorage.removeItem('email')
       localStorage.removeItem('price');
    }
+    
+   const getProfileData = useCallback(async () => {
+    const res = await fetch(
+      "https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyAVZp_jrP3dadhs6I5prUzEgx_9XQz3HYw",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          idToken: localStorage.getItem("tokenId"),
+        }),
+      }
+    );
+    const data = await res.json();
+    console.log(data);
+    setShowVerify(true);
+  }, []);
+  useEffect(() => {
+    getProfileData();
+  }, [getProfileData]);
+
        const verifyEmailHandler=async()=>{
            try{
              const res=await fetch(
@@ -27,8 +49,9 @@ const Welcome = () => {
              )
              const data=await res.json();
              //console.log(localStorage.getItem())
+             alert('data')
              console.log("Verify Data",data);
-             setShowVerify(true);
+             //setShowVerify(true);
            } catch (err){
             console.log(err.response);
            }
