@@ -30,10 +30,13 @@ const ExpenseDetails = () => {
          );
          if(postExpense.ok){
            const data=await postExpense.json();
-           const updatedExpense={...expense}
+           const IdName=data.name;
+           const updatedExpense={...expense,IdName};
+           console.log("data",data)
            setExpenses((prevExpense)=> [...prevExpense,updatedExpense])
             //setExpenses(data)
-            alert("database",data)
+            alert("database",updatedExpense)
+            //console.log("upadte",data.name)
          }
        } catch (error){
          console.log(error);
@@ -45,28 +48,69 @@ const ExpenseDetails = () => {
     }
     
 
-    const deleteExpenseHandler = (index) => {
-         
+    const deleteExpenseHandler =async(expense) => {
+      console.log("expense",expense);
+      //console.log("expense",expense.id);
+        alert("sure, delete") 
+        console.log(expense.IdName);  
+        try{
+          const deletedExpense=await fetch(
+            `https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails/${expense.IdName}.json`,
+            {
+              method: "DELETE",
+            }
+          );
+          const updatedExpense=expenses.filter((prevExpense)=>prevExpense.IdName !==expense.IdName);
+          alert("delete");
+          setExpenses(updatedExpense);
+        } catch(error){
+          console.log(error);
+        }      
+
 
       };
 
       const editExpenseHandler = (index) => {
-         
+         setEditedExpense(expenses[index])
 
       };
-      const cancelHandler=(index)=>{
-         
+      const cancelEditHandler=(index)=>{
+         setEditedExpense(null)
 
       }
     
-      const handleEditSubmit = (updatedExpense) => {
-         
-
-
-
-      };
-       //alert(expenses);
-      
+      const handleEditSubmit =async(event) => {
+        // event.preventDefault();
+        //  alert("sure, Do you want to save")
+        //  const expense={
+        //     title: titleInputRef.current.value,
+        //     category: categoryInputRef.current.value,
+        //     amount: amountInputRef.current.value,
+        //  }
+        //  try{
+        //    const putExpense=await fetch(
+        //       "https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails/-Nj6TXaicD4aEy3xuKNO.json",
+        //      {
+        //        method: 'PUT',
+        //        body: JSON.stringify(expense),
+        //        headers: {
+        //        'Content-Type': 'application/json',
+        //      },
+        //     }
+        //    )
+        //    if(putExpense.ok){
+        //      const data=await putExpense.json();
+        //      const updatedExpense={...expense}
+        //      setExpenses((prevExpense)=> [...prevExpense,updatedExpense])
+        //    }
+        //  } catch(error){
+        //    console.log(error)
+        //  }
+        //  titleInputRef.current.value="";
+        //  categoryInputRef.current.value="";
+        //  amountInputRef.current.value="",
+          
+        }
 
   return (
     <div className='container'>
@@ -106,7 +150,7 @@ const ExpenseDetails = () => {
                 <td>{expense.amount}</td>
                 <td>
                     <button onClick={()=>editExpenseHandler(index)}>Edit</button>
-                    <button onClick={()=>deleteExpenseHandler(index)}>Delete</button>
+                    <button onClick={()=>deleteExpenseHandler(expense)}>Delete</button>
                 </td>
               </tr>
             ))}
@@ -117,28 +161,18 @@ const ExpenseDetails = () => {
       {editedExpense && (
         <div>
           <h2>Edit Expense</h2>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleEditSubmit({
-                ...editedExpense,
-                title: e.target.title.value,
-                category: e.target.category.value,
-                price: e.target.price.value,
-              });
-            }}
-          >
+          <form>
             <label htmlFor="title">Title:</label>
-            <input type="text" id="title" defaultValue={editedExpense.title} required />
+            <input type="text" id="title" defaultValue={editedExpense.title} required  ref={titleInputRef}/>
 
             <label htmlFor="category">Category:</label>
-            <input type="text" id="category" defaultValue={editedExpense.category} required />
+            <input type="text" id="category" defaultValue={editedExpense.category} required ref={categoryInputRef}/>
 
             <label htmlFor="price">Price:</label>
-            <input type="text" id="price" defaultValue={editedExpense.price} required />
+            <input type="text" id="price" defaultValue={editedExpense.amount} required ref={amountInputRef}/>
             &nbsp;
-            <button type="submit">Save</button> &nbsp;
-            <button onClick={cancelHandler}>cancel</button>
+            <button type="submit" onClick={handleEditSubmit}>Save</button> &nbsp;
+            <button onClick={cancelEditHandler}>cancel</button>
           </form>
         </div>
       )}
