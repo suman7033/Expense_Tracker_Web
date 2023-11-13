@@ -1,116 +1,152 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import './expenseDetails.css';
 
 const ExpenseDetails = () => {
-  const [expenses, setExpenses]=useState([]);
-  const [addExpenses, setAddExpense]=useState(false);
-  const [editedExpense, setEditedExpense]=useState(null);
+  const [expenses, setExpenses] = useState([]);
+  const [addExpenses, setAddExpense] = useState(false);
+  const [editedExpense, setEditedExpense] = useState(null);
 
-  const titleInputRef=useRef("");
-  const amountInputRef=useRef("");
-  const categoryInputRef=useRef("");
-    
-    const addExpenseHandler=async(event)=>{
-       event.preventDefault();
-       const expense={
-         title: titleInputRef.current.value,
-         category: categoryInputRef.current.value,
-         amount: amountInputRef.current.value,
-       }
-       try{
-         const postExpense = await fetch (
-           "https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails.json",
-           {
-             method: 'POST',
-             body: JSON.stringify(expense),
-             headers: {
-               'Content-Type': 'application/json',
-             },
-           }
-         );
-         if(postExpense.ok){
-           const data=await postExpense.json();
-           const IdName=data.name;
-           const updatedExpense={...expense,IdName};
-           console.log("data",data)
-           setExpenses((prevExpense)=> [...prevExpense,updatedExpense])
-            //setExpenses(data)
-            alert("database",updatedExpense)
-            //console.log("upadte",data.name)
-         }
-       } catch (error){
-         console.log(error);
-       }
-       titleInputRef.current.value="";
-       categoryInputRef.current.value="";
-       amountInputRef.current.value="";
+  const titleInputRef = useRef('');
+  const amountInputRef = useRef('');
+  const categoryInputRef = useRef('');
 
-    }
-    
+  const EditTitleInputRef = useRef('');
+  const EditCategoryInputRef = useRef('');
+  const EditAmountInputRef = useRef('');
 
-    const deleteExpenseHandler =async(expense) => {
-      console.log("expense",expense);
-      //console.log("expense",expense.id);
-        alert("sure, delete") 
-        console.log(expense.IdName);  
-        try{
-          const deletedExpense=await fetch(
-            `https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails/${expense.IdName}.json`,
-            {
-              method: "DELETE",
-            }
-          );
-          const updatedExpense=expenses.filter((prevExpense)=>prevExpense.IdName !==expense.IdName);
-          alert("delete");
-          setExpenses(updatedExpense);
-        } catch(error){
-          console.log(error);
-        }      
-
-
-      };
-
-      const editExpenseHandler = (index) => {
-         setEditedExpense(expenses[index])
-
-      };
-      const cancelEditHandler=(index)=>{
-         setEditedExpense(null)
-
-      }
-    
-      const handleEditSubmit =async(event) => {
-        // event.preventDefault();
-        //  alert("sure, Do you want to save")
-        //  const expense={
-        //     title: titleInputRef.current.value,
-        //     category: categoryInputRef.current.value,
-        //     amount: amountInputRef.current.value,
-        //  }
-        //  try{
-        //    const putExpense=await fetch(
-        //       "https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails/-Nj6TXaicD4aEy3xuKNO.json",
-        //      {
-        //        method: 'PUT',
-        //        body: JSON.stringify(expense),
-        //        headers: {
-        //        'Content-Type': 'application/json',
-        //      },
-        //     }
-        //    )
-        //    if(putExpense.ok){
-        //      const data=await putExpense.json();
-        //      const updatedExpense={...expense}
-        //      setExpenses((prevExpense)=> [...prevExpense,updatedExpense])
-        //    }
-        //  } catch(error){
-        //    console.log(error)
-        //  }
-        //  titleInputRef.current.value="";
-        //  categoryInputRef.current.value="";
-        //  amountInputRef.current.value="",
-          
+  useEffect(() => {
+    // Fetch expenses from Firebase when the component mounts
+    const fetchExpenses = async () => {
+      try {
+        const response = await fetch('https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails.json');
+        if (!response.ok) {
+          throw new Error('Failed to fetch expenses.');
         }
+        const data = await response.json();
+        const loadedExpenses = [];
+        for (const key in data) {
+          loadedExpenses.push({
+            id: key,
+            title: data[key].title,
+            category: data[key].category,
+            amount: data[key].amount,
+          });
+        }
+        setExpenses(loadedExpenses);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchExpenses();
+  }, []);
+
+  const addExpenseHandler = async (event) => {
+    event.preventDefault();
+
+    const expense = {
+      title: titleInputRef.current.value,
+      category: categoryInputRef.current.value,
+      amount: amountInputRef.current.value,
+    };
+
+    try {
+      const response = await fetch('https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails.json', {
+        method: 'POST',
+        body: JSON.stringify(expense),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add expense.');
+      }
+
+      const data = await response.json();
+      const updatedExpense = { ...expense, id: data.name };
+      setExpenses((prevExpenses) => [...prevExpenses, updatedExpense]);
+      alert('Expense added successfully!');
+    } catch (error) {
+      console.error(error);
+      alert('Failed to add expense. Please try again.');
+    }
+
+    titleInputRef.current.value = '';
+    categoryInputRef.current.value = '';
+    amountInputRef.current.value = '';
+  };
+
+  const deleteExpenseHandler = async (expense) => {
+    try {
+      const response = await fetch(
+        `https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails/${expense.id}.json`,
+        {
+          method: 'DELETE',
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to delete expense.');
+      }
+
+      const updatedExpenses = expenses.filter((prevExpense) => prevExpense.id !== expense.id);
+      setExpenses(updatedExpenses);
+      alert('Expense deleted successfully!');
+    } catch (error) {
+      console.error(error);
+      alert('Failed to delete expense. Please try again.');
+    }
+  };
+
+  const editExpenseHandler = (index) => {
+    setEditedExpense(expenses[index]);
+  };
+
+  const cancelEditHandler = () => {
+    setEditedExpense(null);
+  };
+
+  const handleEditSubmit = async () => {
+    try {
+      const response = await fetch(
+        `https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails/${editedExpense.id}.json`,
+        {
+          method: 'PUT',
+          body: JSON.stringify({
+            title: EditTitleInputRef.current.value,
+            category: EditCategoryInputRef.current.value,
+            amount: EditAmountInputRef.current.value,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to edit expense.');
+      }
+
+      const updatedExpense = {
+        ...editedExpense,
+        title: EditTitleInputRef.current.value,
+        category: EditCategoryInputRef.current.value,
+        amount: EditAmountInputRef.current.value,
+      };
+
+      const updatedExpenses = expenses.map((prevExpense) =>
+        prevExpense.id === updatedExpense.id ? updatedExpense : prevExpense
+      );
+
+      setExpenses(updatedExpenses);
+      setEditedExpense(null);
+      alert('Expense edited successfully!');
+    } catch (error) {
+      console.error(error);
+      alert('Failed to edit expense. Please try again.');
+    }
+  };
 
   return (
     <div className='container'>
@@ -118,15 +154,18 @@ const ExpenseDetails = () => {
         <h2>Add Daily Expenses</h2>
         <hr />
         <div className='form-group'>
-          <label htmlFor='title'>Expense Title</label><br/>
-          <input type='text' id='title' className='input' placeholder='Expense Title' ref={titleInputRef}/>
+          <label htmlFor='title'>Expense Title</label>
+          <br />
+          <input type='text' id='title' className='input' placeholder='Expense Title' ref={titleInputRef} />
         </div>
         <div className='form-group'>
-          <label htmlFor='category'>Category</label><br/>
-          <input type='text' className='input'id='category' placeholder='Enter Category' ref={categoryInputRef} />
+          <label htmlFor='category'>Category</label>
+          <br />
+          <input type='text' className='input' id='category' placeholder='Enter Category' ref={categoryInputRef} />
         </div>
         <div className='form-group'>
-          <label htmlFor='price'>Price</label><br/>
+          <label htmlFor='price'>Price</label>
+          <br />
           <input type='text' id='price' className='input' placeholder='Enter Price' ref={amountInputRef} />
         </div>
         <button onClick={addExpenseHandler} className='resetBtn'>
@@ -140,6 +179,7 @@ const ExpenseDetails = () => {
               <th>Title</th>
               <th>Category</th>
               <th>Price</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -149,35 +189,44 @@ const ExpenseDetails = () => {
                 <td>{expense.category}</td>
                 <td>{expense.amount}</td>
                 <td>
-                    <button onClick={()=>editExpenseHandler(index)}>Edit</button>
-                    <button onClick={()=>deleteExpenseHandler(expense)}>Delete</button>
+                  <button className='EditBtn' onClick={() => editExpenseHandler(index)}>
+                    Edit
+                  </button>{' '}
+                  &nbsp; &nbsp; &nbsp;&nbsp;
+                  <button className='DeleteBtn' onClick={() => deleteExpenseHandler(expense)}>
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}
           </tbody>
-           
         </table>
         {/* Edit form */}
-      {editedExpense && (
-        <div>
-          <h2>Edit Expense</h2>
-          <form>
-            <label htmlFor="title">Title:</label>
-            <input type="text" id="title" defaultValue={editedExpense.title} required  ref={titleInputRef}/>
+        {editedExpense && (
+          <div>
+            <h2>Edit Expense</h2>
+            <form>
+              <label htmlFor='title'>Title:</label>
+              <input type='text' id='title' defaultValue={editedExpense.title} required ref={EditTitleInputRef} />
 
-            <label htmlFor="category">Category:</label>
-            <input type="text" id="category" defaultValue={editedExpense.category} required ref={categoryInputRef}/>
+              <label htmlFor='category'>Category:</label>
+              <input type='text' id='category' defaultValue={editedExpense.category} required ref={EditCategoryInputRef} />
 
-            <label htmlFor="price">Price:</label>
-            <input type="text" id="price" defaultValue={editedExpense.amount} required ref={amountInputRef}/>
-            &nbsp;
-            <button type="submit" onClick={handleEditSubmit}>Save</button> &nbsp;
-            <button onClick={cancelEditHandler}>cancel</button>
-          </form>
-        </div>
-      )}
-    </div>
+              <label htmlFor='price'>Price:</label>
+              <input type='text' id='price' defaultValue={editedExpense.amount} required ref={EditAmountInputRef} />
+              &nbsp;
+              <button type='button' onClick={handleEditSubmit}>
+                Save
+              </button>{' '}
+              &nbsp;
+              <button type='button' onClick={cancelEditHandler}>
+                Cancel
+              </button>
+            </form>
+          </div>
+        )}
       </div>
+    </div>
   );
 };
 

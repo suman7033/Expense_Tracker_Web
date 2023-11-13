@@ -29,4 +29,17 @@
     padding: 8px;
     text-align: left;
   }
-  
+  .DeleteBtn{
+    background-color: rgb(225, 135, 135);
+    border-radius: 5px;
+    width: 100px;
+    padding: 10px;
+    cursor: pointer;
+  }
+.EditBtn{
+  background-color: rgb(74, 183, 230);
+  border-radius: 5px;
+  width: 100px;
+  padding: 10px;
+  cursor: pointer;
+}
