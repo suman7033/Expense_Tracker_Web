@@ -5,6 +5,10 @@ const ExpenseDetails = () => {
   const [expenses, setExpenses] = useState([]);
   const [addExpenses, setAddExpense] = useState(false);
   const [editedExpense, setEditedExpense] = useState(null);
+  const enteredEmail=localStorage.getItem("email");
+  const ChangeEmail=enteredEmail.replace('@','').replace('.','')
+
+  console.log("email",enteredEmail);
 
   const titleInputRef = useRef('');
   const amountInputRef = useRef('');
@@ -18,7 +22,7 @@ const ExpenseDetails = () => {
     // Fetch expenses from Firebase when the component mounts
     const fetchExpenses = async () => {
       try {
-        const response = await fetch('https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails.json');
+        const response = await fetch(`https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails/${ChangeEmail}.json`);
         if (!response.ok) {
           throw new Error('Failed to fetch expenses.');
         }
@@ -51,7 +55,7 @@ const ExpenseDetails = () => {
     };
 
     try {
-      const response = await fetch('https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails.json', {
+      const response = await fetch(`https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails/${ChangeEmail}.json`,{
         method: 'POST',
         body: JSON.stringify(expense),
         headers: {
@@ -80,7 +84,7 @@ const ExpenseDetails = () => {
   const deleteExpenseHandler = async (expense) => {
     try {
       const response = await fetch(
-        `https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails/${expense.id}.json`,
+        `https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails/${ChangeEmail}.json`,
         {
           method: 'DELETE',
         }
@@ -110,7 +114,7 @@ const ExpenseDetails = () => {
   const handleEditSubmit = async () => {
     try {
       const response = await fetch(
-        `https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails/${editedExpense.id}.json`,
+        `https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails/${ChangeEmail}.json`,
         {
           method: 'PUT',
           body: JSON.stringify({
