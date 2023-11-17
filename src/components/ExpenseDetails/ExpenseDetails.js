@@ -1,14 +1,20 @@
 import React, { useRef, useState, useEffect } from 'react';
 import './expenseDetails.css';
+import { useDispatch, useSelector } from 'react-redux';
+import { expenseAction } from '../../store/expenseSlice';
 
 const ExpenseDetails = () => {
-  const [expenses, setExpenses] = useState([]);
-  const [addExpenses, setAddExpense] = useState(false);
-  const [editedExpense, setEditedExpense] = useState(null);
-  const enteredEmail=localStorage.getItem("email");
-  const ChangeEmail=enteredEmail.replace('@','').replace('.','')
+  const expensesData=useSelector((state)=> state.expense.expenses)
+  const email=useSelector((state)=> state.login.email);
+  const dispatch=useDispatch();
 
-  console.log("email",enteredEmail);
+  //const [expenses, setExpenses] = useState([]);
+  const [totalAmount, setTotalAmount]=useState(0);
+  const [editedExpense, setEditedExpense] = useState(null);
+  const ChangeEmail=email.replace('@','').replace('.','')
+
+  console.log("email",email);
+  console.log("expensesData",expensesData)
 
   const titleInputRef = useRef('');
   const amountInputRef = useRef('');
@@ -18,32 +24,39 @@ const ExpenseDetails = () => {
   const EditCategoryInputRef = useRef('');
   const EditAmountInputRef = useRef('');
 
-  useEffect(() => {
-    // Fetch expenses from Firebase when the component mounts
-    const fetchExpenses = async () => {
-      try {
-        const response = await fetch(`https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails/${ChangeEmail}.json`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch expenses.');
-        }
-        const data = await response.json();
-        const loadedExpenses = [];
-        for (const key in data) {
-          loadedExpenses.push({
-            id: key,
-            title: data[key].title,
-            category: data[key].category,
-            amount: data[key].amount,
-          });
-        }
-        setExpenses(loadedExpenses);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+  // useEffect(() => {
+  //   //alert("useEffect")
+  //   // Fetch expenses from Firebase when the component mounts
+  //   const fetchExpenses = async () => {
+  //     try {
+  //       const response = await fetch(`https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails/${ChangeEmail}.json`);
+  //       if (!response.ok) {
+  //         throw new Error('Failed to fetch expenses.');
+  //       }
+  //       const data = await response.json();
+  //       const loadedExpenses = [];
+  //       //
+  //       let total=0;
+  //       for (const key in data) {
+  //         const currentExpense={
+  //           id: key,
+  //           title: data[key].title,
+  //           category: data[key].category,
+  //           amount: data[key].amount,
+  //         }
+  //         loadedExpenses.push(currentExpense);
+  //         total+=parseFloat(currentExpense.amount)
+  //       }
+  //       //setExpenses(loadedExpenses);
+  //       dispatch(expenseAction.setExpense(loadedExpenses,total));
+  //       //setTotalAmount(total);
+  //     } catch (error) {
+  //       console.error(error);
+  //     }
+  //   };
 
-    fetchExpenses();
-  }, []);
+  //   fetchExpenses();
+  // }, [ChangeEmail]);
 
   const addExpenseHandler = async (event) => {
     event.preventDefault();
@@ -68,8 +81,10 @@ const ExpenseDetails = () => {
       }
 
       const data = await response.json();
-      const updatedExpense = { ...expense, id: data.name };
-      setExpenses((prevExpenses) => [...prevExpenses, updatedExpense]);
+      const updatedExpense = { ...expense, id: data.name, };
+      //setExpenses((prevExpenses) => [...prevExpenses, updatedExpense]);
+      dispatch(expenseAction.addExpense(updatedExpense))
+      //setTotalAmount((prevTotal)=> prevTotal+parseFloat(updatedExpense.amount))
       alert('Expense added successfully!');
     } catch (error) {
       console.error(error);
@@ -94,8 +109,10 @@ const ExpenseDetails = () => {
         throw new Error('Failed to delete expense.');
       }
 
-      const updatedExpenses = expenses.filter((prevExpense) => prevExpense.id !== expense.id);
-      setExpenses(updatedExpenses);
+      const updatedExpenses = expensesData.filter((prevExpense) => prevExpense.id !== expense.id);
+      //setExpenses(updatedExpenses);
+      dispatch(expenseAction.deleteExpense(updatedExpenses));
+      setTotalAmount((prevTotal)=> prevTotal-parseFloat(expense.amount))
       alert('Expense deleted successfully!');
     } catch (error) {
       console.error(error);
@@ -104,7 +121,8 @@ const ExpenseDetails = () => {
   };
 
   const editExpenseHandler = (index) => {
-    setEditedExpense(expenses[index]);
+    //setEditedExpense(expenses[index]);
+    dispatch(expenseAction.setExpense(expensesData[index]))
   };
 
   const cancelEditHandler = () => {
@@ -139,11 +157,17 @@ const ExpenseDetails = () => {
         amount: EditAmountInputRef.current.value,
       };
 
-      const updatedExpenses = expenses.map((prevExpense) =>
+      const updatedExpenses = expensesData.map((prevExpense) =>
         prevExpense.id === updatedExpense.id ? updatedExpense : prevExpense
-      );
+      )
 
-      setExpenses(updatedExpenses);
+      //setExpenses(updatedExpenses);
+      dispatch(expenseAction.addExpense(updatedExpense));
+      setTotalAmount((prevTotal)=>{
+        const oldAmount=parseFloat(editedExpense.amount)
+        const newAmount=parseFloat(updatedExpense.amount)
+        return prevTotal-oldAmount+newAmount;
+      })
       setEditedExpense(null);
       alert('Expense edited successfully!');
     } catch (error) {
@@ -187,7 +211,7 @@ const ExpenseDetails = () => {
             </tr>
           </thead>
           <tbody>
-            {expenses.map((expense, index) => (
+            {expensesData.map((expense, index) => (
               <tr key={index}>
                 <td>{expense.title}</td>
                 <td>{expense.category}</td>
@@ -205,6 +229,8 @@ const ExpenseDetails = () => {
             ))}
           </tbody>
         </table>
+        {/* total */}
+        <h2>Total {totalAmount}</h2>
         {/* Edit form */}
         {editedExpense && (
           <div>

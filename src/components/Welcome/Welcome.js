@@ -1,10 +1,14 @@
 import {Link} from 'react-router-dom';
 import React, { useEffect, useState,useCallback } from 'react';
 import './welcome.css';
+import { useDispatch } from 'react-redux';
+//import { loginAction } from '../../store/loginSlice';
 
 const Welcome = () => {
   const [showVerify, setShowVerify]=useState(false);
+   const dispatch=useDispatch();
    const LogoutHandler=()=>{
+      //dispatch(loginAction.logout());
       localStorage.removeItem('idToken');
       localStorage.removeItem('tokenId');
       localStorage.removeItem('email')
