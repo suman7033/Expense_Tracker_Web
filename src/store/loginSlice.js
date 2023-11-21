@@ -11,11 +11,9 @@ const loginSlice = createSlice({
   initialState: initialLoginState,
   reducers: {
     login(state, action) {
-      console.log("loginAction",action);
-      console.log("loginState",state);
-      state.token = action.payload.idToken;
+        state.token = action.payload.idToken;
       state.email = action.payload.email;
-      //console.log("state",state.email);
+      console.log("state.email",action.payload.email);
     },
     logout(state) {
       state.token = "";
@@ -26,7 +24,6 @@ const loginSlice = createSlice({
     },
   },
 });
-
 export const loginAction = loginSlice.actions;
 
 export default loginSlice.reducer;

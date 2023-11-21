@@ -1,20 +1,23 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useEffect} from 'react';
 import './expenseDetails.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { expenseAction } from '../../store/expenseSlice';
 
 const ExpenseDetails = () => {
   const expensesData=useSelector((state)=> state.expense.expenses)
-  const email=useSelector((state)=> state.login.email);
-  const dispatch=useDispatch();
+  const totalAmount=useSelector((state)=> state.expense.totalAmount)
+  //const email=useSelector((state)=> state.login.email);
+  const email=localStorage.getItem("email");
+  console.log("mainEmail",email);
+  const editedExpense=useSelector((state)=>state.expense.editedExpense)
+  const loading=useSelector((state)=>state.expense.loading)
+  const toggleColor=useSelector((state)=>state.expense.darkTheme)
 
-  //const [expenses, setExpenses] = useState([]);
-  const [totalAmount, setTotalAmount]=useState(0);
-  const [editedExpense, setEditedExpense] = useState(null);
-  const ChangeEmail=email.replace('@','').replace('.','')
+  const dispatch=useDispatch()
+  console.log("totalAmount111",totalAmount);
 
-  console.log("email",email);
-  console.log("expensesData",expensesData)
+  //const ChangeEmail=email.replace('@').replace('.')
+  const ChangeEmail=email.replace(/[@.]/g,'')
 
   const titleInputRef = useRef('');
   const amountInputRef = useRef('');
@@ -24,39 +27,45 @@ const ExpenseDetails = () => {
   const EditCategoryInputRef = useRef('');
   const EditAmountInputRef = useRef('');
 
-  // useEffect(() => {
-  //   //alert("useEffect")
-  //   // Fetch expenses from Firebase when the component mounts
-  //   const fetchExpenses = async () => {
-  //     try {
-  //       const response = await fetch(`https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails/${ChangeEmail}.json`);
-  //       if (!response.ok) {
-  //         throw new Error('Failed to fetch expenses.');
-  //       }
-  //       const data = await response.json();
-  //       const loadedExpenses = [];
-  //       //
-  //       let total=0;
-  //       for (const key in data) {
-  //         const currentExpense={
-  //           id: key,
-  //           title: data[key].title,
-  //           category: data[key].category,
-  //           amount: data[key].amount,
-  //         }
-  //         loadedExpenses.push(currentExpense);
-  //         total+=parseFloat(currentExpense.amount)
-  //       }
-  //       //setExpenses(loadedExpenses);
-  //       dispatch(expenseAction.setExpense(loadedExpenses,total));
-  //       //setTotalAmount(total);
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   };
+     const fetchExpenses = async () => {
+      //console.log("useEffect expe",expensesData);
+      dispatch(expenseAction.setLoading(true));
+      try {
+        console.log("ddd",ChangeEmail);
+        const response = await fetch(`https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails/${ChangeEmail}.json`)
+        console.log("e",ChangeEmail);
 
-  //   fetchExpenses();
-  // }, [ChangeEmail]);
+        if (!response.ok) {
+          throw new Error('Failed to fetch expenses.');
+        }
+        const data = await response.json();
+        const loadedExpenses = [];
+        console.log("data",data);
+        let total=0;
+        for (const key in data) {
+          const currentExpense={
+            id: key,
+            title: data[key].title,
+            category: data[key].category,
+            amount: data[key].amount,
+          }
+           
+          loadedExpenses.push(currentExpense);
+          console.log("total",currentExpense.amount);
+        }
+        console.log("setExpense",loadedExpenses);
+        console.log("totalAmount",total);
+        console.log("useEffect expe",expensesData);
+        
+        dispatch(expenseAction.setExpense(loadedExpenses,total))
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    useEffect(()=>{
+      console.log("email in useEffect",ChangeEmail);
+       fetchExpenses();
+    },[ChangeEmail])
 
   const addExpenseHandler = async (event) => {
     event.preventDefault();
@@ -68,6 +77,7 @@ const ExpenseDetails = () => {
     };
 
     try {
+      console.log("addEmail",ChangeEmail);
       const response = await fetch(`https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails/${ChangeEmail}.json`,{
         method: 'POST',
         body: JSON.stringify(expense),
@@ -81,10 +91,9 @@ const ExpenseDetails = () => {
       }
 
       const data = await response.json();
-      const updatedExpense = { ...expense, id: data.name, };
-      //setExpenses((prevExpenses) => [...prevExpenses, updatedExpense]);
+      const updatedExpense = { ...expense, id: data.name}
+       console.log("AddExpense",updatedExpense);
       dispatch(expenseAction.addExpense(updatedExpense))
-      //setTotalAmount((prevTotal)=> prevTotal+parseFloat(updatedExpense.amount))
       alert('Expense added successfully!');
     } catch (error) {
       console.error(error);
@@ -99,7 +108,7 @@ const ExpenseDetails = () => {
   const deleteExpenseHandler = async (expense) => {
     try {
       const response = await fetch(
-        `https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails/${ChangeEmail}.json`,
+        `https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails/${ChangeEmail}/${expense.id}.json`,
         {
           method: 'DELETE',
         }
@@ -108,33 +117,30 @@ const ExpenseDetails = () => {
       if (!response.ok) {
         throw new Error('Failed to delete expense.');
       }
-
-      const updatedExpenses = expensesData.filter((prevExpense) => prevExpense.id !== expense.id);
-      //setExpenses(updatedExpenses);
-      dispatch(expenseAction.deleteExpense(updatedExpenses));
-      setTotalAmount((prevTotal)=> prevTotal-parseFloat(expense.amount))
-      alert('Expense deleted successfully!');
+      dispatch(expenseAction.deleteExpense(expense));
+      console.log("delete",expense);
+      alert('Expense deleted successfully!')
     } catch (error) {
-      console.error(error);
-      alert('Failed to delete expense. Please try again.');
+      console.error(error)
+      alert('Failed to delete expense. Please try again.')
     }
   };
 
   const editExpenseHandler = (index) => {
-    //setEditedExpense(expenses[index]);
-    dispatch(expenseAction.setExpense(expensesData[index]))
+      dispatch(expenseAction.editExpense(index));
+    console.log("edit",index);
   };
 
   const cancelEditHandler = () => {
-    setEditedExpense(null);
+    dispatch(expenseAction.editExpense());
   };
 
   const handleEditSubmit = async () => {
     try {
       const response = await fetch(
-        `https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails/${ChangeEmail}.json`,
+        `https://expense-tracker-a55b0-default-rtdb.firebaseio.com/userDetails/${ChangeEmail}/${editedExpense.id}.json`,
         {
-          method: 'PUT',
+          method: 'PATCH',
           body: JSON.stringify({
             title: EditTitleInputRef.current.value,
             category: EditCategoryInputRef.current.value,
@@ -150,34 +156,32 @@ const ExpenseDetails = () => {
         throw new Error('Failed to edit expense.');
       }
 
-      const updatedExpense = {
+      const updatedExpenseData = {
         ...editedExpense,
         title: EditTitleInputRef.current.value,
         category: EditCategoryInputRef.current.value,
         amount: EditAmountInputRef.current.value,
       };
+      const updatedExpenses=expensesData.map((item)=>
+        item.id===editedExpense.id ? {...updatedExpenseData}:item
+      );
+      dispatch(expenseAction.updateExpense(updatedExpenses));
 
-      const updatedExpenses = expensesData.map((prevExpense) =>
-        prevExpense.id === updatedExpense.id ? updatedExpense : prevExpense
-      )
-
-      //setExpenses(updatedExpenses);
-      dispatch(expenseAction.addExpense(updatedExpense));
-      setTotalAmount((prevTotal)=>{
-        const oldAmount=parseFloat(editedExpense.amount)
-        const newAmount=parseFloat(updatedExpense.amount)
-        return prevTotal-oldAmount+newAmount;
-      })
-      setEditedExpense(null);
       alert('Expense edited successfully!');
     } catch (error) {
       console.error(error);
       alert('Failed to edit expense. Please try again.');
     }
   };
+  if(loading){
+    return <div className='errorImg'><p>Loading...</p>
+     <img className='img'src='https://media.tenor.com/JeNT_qdjEYcAAAAj/loading.gif'></img>
+    </div>
+  }
 
   return (
-    <div className='container'>
+    <>
+    <div className={`container ${toggleColor ? 'dark': 'light'}`}>
       <div className='auth'>
         <h2>Add Daily Expenses</h2>
         <hr />
@@ -217,7 +221,7 @@ const ExpenseDetails = () => {
                 <td>{expense.category}</td>
                 <td>{expense.amount}</td>
                 <td>
-                  <button className='EditBtn' onClick={() => editExpenseHandler(index)}>
+                  <button className='EditBtn' onClick={() => editExpenseHandler(expense)}>
                     Edit
                   </button>{' '}
                   &nbsp; &nbsp; &nbsp;&nbsp;
@@ -231,25 +235,24 @@ const ExpenseDetails = () => {
         </table>
         {/* total */}
         <h2>Total {totalAmount}</h2>
-        {/* Edit form */}
         {editedExpense && (
           <div>
             <h2>Edit Expense</h2>
             <form>
               <label htmlFor='title'>Title:</label>
-              <input type='text' id='title' defaultValue={editedExpense.title} required ref={EditTitleInputRef} />
+              <input type='text' className='Edittitle' defaultValue={editedExpense.title} required ref={EditTitleInputRef} /><br/>
 
               <label htmlFor='category'>Category:</label>
-              <input type='text' id='category' defaultValue={editedExpense.category} required ref={EditCategoryInputRef} />
+              <input type='text' className='Editcategory' defaultValue={editedExpense.category} required ref={EditCategoryInputRef} /><br/>
 
               <label htmlFor='price'>Price:</label>
-              <input type='text' id='price' defaultValue={editedExpense.amount} required ref={EditAmountInputRef} />
+              <input type='text' className='Editprice' defaultValue={editedExpense.amount} required ref={EditAmountInputRef} /><br/><br/>
               &nbsp;
-              <button type='button' onClick={handleEditSubmit}>
+              <button type='button' className='saveBtn' onClick={handleEditSubmit}>
                 Save
               </button>{' '}
               &nbsp;
-              <button type='button' onClick={cancelEditHandler}>
+              <button type='button' className='saveBtn'onClick={cancelEditHandler}>
                 Cancel
               </button>
             </form>
@@ -257,6 +260,7 @@ const ExpenseDetails = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

@@ -44,9 +44,7 @@ const Login = () => {
   }
  })
  .then((data)=>{
-
-  alert("sucessfully Login");
-  //console.log("idToken",data.idToken);
+  alert("Sucessfull");
   Navigate('/home');
   localStorage.setItem("tokenId",data.idToken);
   localStorage.setItem("idToken",data.idToken);

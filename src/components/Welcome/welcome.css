@@ -1,11 +1,11 @@
 .container {
     display: flex;
     justify-content: space-between;
-    background-color: #640def;
+    background-color: #823df1;
   }
   
 .right {
-    flex: 1px; /* To allow each line to take equal space and push apart */
+    flex: 1px;
     padding: 10px;
     background-color: #f1abab;
     border-radius: 15px;
@@ -15,6 +15,7 @@
     flex: 1px;
     padding: 10px;
     font-size: 20px;
+    color: rgb(66, 15, 233);
 }
   
 .button{
@@ -25,6 +26,7 @@
 .verifyBtn{
    border-radius: 5px;
    margin: 35px;
+   height: 60px;
    background-color: rgb(225, 225, 27);
 }
 .verifyBtn:hover{
@@ -39,3 +41,37 @@
 .logoutBtn:hover{
   background-color: #f28e8e;
 }
+.activeBtn {
+  /* background-color: #353d35; */
+  border: none; 
+  color: white; 
+  background-color: rgb(251, 253, 248);
+  padding: 10px 20px;
+  text-align: center; 
+  font-size: 15px;
+  cursor: pointer;
+  margin: 40px;
+  color: rgb(202, 245, 11);
+  border-radius: 10px;
+}
+.dark{
+  background-color: rgb(212, 255, 0);
+}
+.light{
+  background-color: #e1d7d7;
+}
+.DarkIcon{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 50px;
+  height: 50px;
+}
+.DwnIcon{
+  width: 50px;
+  cursor: pointer;
+}
+
+
+

@@ -1,41 +1,23 @@
 import {Link} from 'react-router-dom';
-import React, { useEffect, useState,useCallback } from 'react';
+import React, {useState} from 'react';
 import './welcome.css';
-import { useDispatch } from 'react-redux';
-//import { loginAction } from '../../store/loginSlice';
+import { useSelector,useDispatch } from 'react-redux';
+import { expenseAction } from '../../store/expenseSlice';
+import DarkIcon from '../Img/DarkIcon.gif'
+import DwnIcon from '../Img/Dwn.gif'
+import Dwnicon from '../Img/Dwnicon.png'
+import Darkicon from '../Img/Darkicon.png'
 
 const Welcome = () => {
   const [showVerify, setShowVerify]=useState(false);
-   const dispatch=useDispatch();
+  const [showIcon, setShowIcon]=useState(true);
+  const dispatch=useDispatch();
+  const toggleColor=useSelector((state)=>state.expense.darkTheme)
+  const totalAmount=useSelector((state)=>state.expense.totalAmount)
    const LogoutHandler=()=>{
-      //dispatch(loginAction.logout());
-      localStorage.removeItem('idToken');
-      localStorage.removeItem('tokenId');
-      localStorage.removeItem('email')
-      localStorage.removeItem('price');
+      dispatch(expenseAction.setExpense([],0));
    }
-    
-   const getProfileData = useCallback(async () => {
-    const res = await fetch(
-      "https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyAVZp_jrP3dadhs6I5prUzEgx_9XQz3HYw",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          idToken: localStorage.getItem("tokenId"),
-        }),
-      }
-    );
-    const data = await res.json();
-    console.log(data);
-    setShowVerify(true);
-  }, []);
-  useEffect(() => {
-    getProfileData();
-  }, [getProfileData]);
-
+  
        const verifyEmailHandler=async()=>{
            try{
              const res=await fetch(
@@ -52,25 +34,41 @@ const Welcome = () => {
                 }
              )
              const data=await res.json();
-             //console.log(localStorage.getItem())
              alert('data')
              console.log("Verify Data",data);
-             //setShowVerify(true);
+             setShowVerify(true);
            } catch (err){
             console.log(err.response);
            }
        }
+       const toggleTheme=()=>{
+        setShowIcon(false);
+          dispatch(expenseAction.toggleTheme())
+       }
+   const DwnHandler=()=>{
+      alert("sure Download")
+      setShowIcon(false);
+
+   }
    
   return (
     <>
-    <div className='container'>
+    <div>
+    <div className={`container ${toggleColor ? 'dark': 'light'}`}>
     <h5 className='mt-2 left'><b>Welcome to Expense Tracker</b></h5>
+    {totalAmount > 10000 && (
+          <div>
+            { showIcon ? <img className='DwnIcon' onClick={DwnHandler} src={DwnIcon}></img> : <img src={Dwnicon}></img>}
+            { showIcon ? <button className='activeBtn' onClick={toggleTheme}><img className='DarkIcon' src={DarkIcon}></img></button> : <button className='activeBtn' onClick={toggleTheme}><img className='DarkIcon' src={Darkicon}></img></button>}
+          </div>
+        )}
     <div>
        <h5 className=' mt-2 right'>Your profile is incomplete.<Link className='button' to='/profile'><b>Complete Now</b></Link>
        </h5>  
     </div> &nbsp; &nbsp; &nbsp;
     <button  className='verifyBtn' onClick={verifyEmailHandler}>{showVerify? 'Verified': 'Verify Email'}</button>
     <button className='logoutBtn' onClick={LogoutHandler}><Link to='/'>Logout</Link></button>
+  </div>
   </div>
   <hr/>
   </>
