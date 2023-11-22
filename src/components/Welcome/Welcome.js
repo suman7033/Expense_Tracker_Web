@@ -12,6 +12,7 @@ const Welcome = () => {
   const [showVerify, setShowVerify]=useState(false);
   const [showIcon, setShowIcon]=useState(true);
   const dispatch=useDispatch();
+  const expenseData=useSelector((state)=>state.expense.expenses)
   const toggleColor=useSelector((state)=>state.expense.darkTheme)
   const totalAmount=useSelector((state)=>state.expense.totalAmount)
    const LogoutHandler=()=>{
@@ -48,7 +49,35 @@ const Welcome = () => {
    const DwnHandler=()=>{
       alert("sure Download")
       setShowIcon(false);
+      const csvData=convertToCSV(expenseData);
+      downloadCSV(csvData);
+   }
+   const convertToCSV = (data) => {
+    const csvRows = [];
+    const headers = ["Title", "Category", "Amount"];
+    csvRows.push(headers.join(","));
 
+    for (const row of data) {
+      const values = headers.map((header) => {
+        const escaped = String(row[header.toLowerCase()]).replace(/"/g, '\\"');
+        return `"${escaped}"`;
+      });
+      csvRows.push(values.join(","));
+    }
+
+    return csvRows.join("\n");
+  };
+    
+   const downloadCSV=(csvData)=>{
+      const blob=new Blob([csvData],{type: 'text/csv'});
+      const url=window.URL.createObjectURL(blob);
+      const a=document.createElement("a");
+      a.setAttribute('hidden','');
+      a.setAttribute('href',url);
+      a.setAttribute('download','expenses.csv');
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
    }
    
   return (
